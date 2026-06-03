@@ -37,11 +37,11 @@ function imgMsg(msg: any): boolean {
   // Handle the 3 api formats
 
   const content = msg.content
-  if (typeof content === "string") return content === MessageV2.SYNTHETIC_ATTACHMENT_PROMPT
+  if (typeof content === "string") return content === "Attached media from tool result:"
   if (!Array.isArray(content)) return false
   return content.some(
     (part: any) =>
-      (part?.type === "text" || part?.type === "input_text") && part.text === MessageV2.SYNTHETIC_ATTACHMENT_PROMPT,
+      (part?.type === "text" || part?.type === "input_text") && part.text === "Attached media from tool result:",
   )
 }
 
