@@ -22,6 +22,7 @@ import { ChildProcess } from "effect/unstable/process"
 import { ChildProcessSpawner } from "effect/unstable/process/ChildProcessSpawner"
 import { ShellPrompt, type Parameters } from "./shell/prompt"
 import { BashArity } from "@/permission/arity"
+import { getSync } from "@/prompt-loader"
 
 export { Parameters } from "./shell/prompt"
 
@@ -601,7 +602,8 @@ export const ShellTool = Tool.define(
         const shell = Shell.acceptable(cfg.shell)
         const name = Shell.name(shell)
         const limits = yield* trunc.limits()
-        const prompt = ShellPrompt.render(name, process.platform, limits, defaultTimeoutMs)
+            const shellTemplate = getSync("tool/shell")
+        const prompt = ShellPrompt.render(shellTemplate, name, process.platform, limits, defaultTimeoutMs)
         log.info("shell tool using shell", { shell })
 
         return {

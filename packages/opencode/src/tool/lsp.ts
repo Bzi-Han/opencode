@@ -2,11 +2,11 @@ import { Effect, Schema } from "effect"
 import * as Tool from "./tool"
 import path from "path"
 import { LSP } from "@/lsp/lsp"
-import DESCRIPTION from "./lsp.txt"
 import { InstanceState } from "@/effect/instance-state"
 import { pathToFileURL } from "url"
 import { assertExternalDirectoryEffect } from "./external-directory"
 import { FSUtil } from "@opencode-ai/core/fs-util"
+import { getSync } from "@/prompt-loader"
 
 const operations = [
   "goToDefinition",
@@ -40,7 +40,7 @@ export const LspTool = Tool.define(
     const lsp = yield* LSP.Service
     const fs = yield* FSUtil.Service
     return {
-      description: DESCRIPTION,
+      description: getSync("tool/lsp"),
       parameters: Parameters,
       execute: (args: Schema.Schema.Type<typeof Parameters>, ctx: Tool.Context) =>
         Effect.gen(function* () {

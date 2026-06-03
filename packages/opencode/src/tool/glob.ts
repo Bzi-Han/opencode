@@ -5,9 +5,9 @@ import { InstanceState } from "@/effect/instance-state"
 import { FSUtil } from "@opencode-ai/core/fs-util"
 import { Ripgrep } from "@opencode-ai/core/filesystem/ripgrep"
 import { assertExternalDirectoryEffect } from "./external-directory"
-import DESCRIPTION from "./glob.txt"
 import * as Tool from "./tool"
 import { Reference } from "@/reference/reference"
+import { getSync } from "@/prompt-loader"
 
 export const Parameters = Schema.Struct({
   pattern: Schema.String.annotate({ description: "The glob pattern to match files against" }),
@@ -24,7 +24,7 @@ export const GlobTool = Tool.define(
     const reference = yield* Reference.Service
 
     return {
-      description: DESCRIPTION,
+      description: getSync("tool/glob"),
       parameters: Parameters,
       execute: (params: { pattern: string; path?: string }, ctx: Tool.Context) =>
         Effect.gen(function* () {

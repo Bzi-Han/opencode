@@ -10,10 +10,10 @@ import { assertExternalDirectoryEffect } from "./external-directory"
 import { trimDiff } from "./edit"
 import { LSP } from "@/lsp/lsp"
 import { FSUtil } from "@opencode-ai/core/fs-util"
-import DESCRIPTION from "./apply_patch.txt"
 import { FileSystem } from "@opencode-ai/core/filesystem"
 import { Format } from "../format"
 import * as Bom from "@/util/bom"
+import { getSync } from "@/prompt-loader"
 
 export const Parameters = Schema.Struct({
   patchText: Schema.String.annotate({ description: "The full patch text that describes all changes to be made" }),
@@ -304,7 +304,7 @@ export const ApplyPatchTool = Tool.define(
     })
 
     return {
-      description: DESCRIPTION,
+      description: getSync("tool/apply_patch"),
       parameters: Parameters,
       execute: (params: Schema.Schema.Type<typeof Parameters>, ctx: Tool.Context) =>
         run(params, ctx).pipe(Effect.orDie),

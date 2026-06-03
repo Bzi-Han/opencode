@@ -1,7 +1,7 @@
 import { Effect, Schema } from "effect"
 import * as Tool from "./tool"
 import { Question } from "../question"
-import DESCRIPTION from "./question.txt"
+import { getSync } from "@/prompt-loader"
 
 export const Parameters = Schema.Struct({
   questions: Schema.mutable(Schema.Array(Question.Prompt)).annotate({ description: "Questions to ask" }),
@@ -17,7 +17,7 @@ export const QuestionTool = Tool.define<typeof Parameters, Metadata, Question.Se
     const question = yield* Question.Service
 
     return {
-      description: DESCRIPTION,
+      description: getSync("tool/question"),
       parameters: Parameters,
       execute: (params: Schema.Schema.Type<typeof Parameters>, ctx: Tool.Context<Metadata>) =>
         Effect.gen(function* () {

@@ -1,7 +1,7 @@
 import { Effect, Schema } from "effect"
 import * as Tool from "./tool"
-import DESCRIPTION_WRITE from "./todowrite.txt"
 import { Todo } from "../session/todo"
+import { getSync } from "@/prompt-loader"
 
 // Todo.Info is still a zod schema (session/todo.ts). Inline the field shape
 // here rather than referencing its `.shape` — the LLM-visible JSON Schema is
@@ -28,7 +28,7 @@ export const TodoWriteTool = Tool.define<typeof Parameters, Metadata, Todo.Servi
     const todo = yield* Todo.Service
 
     return {
-      description: DESCRIPTION_WRITE,
+      description: getSync("tool/todowrite"),
       parameters: Parameters,
       execute: (params: Schema.Schema.Type<typeof Parameters>, ctx: Tool.Context<Metadata>) =>
         Effect.gen(function* () {

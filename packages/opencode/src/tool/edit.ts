@@ -8,7 +8,6 @@ import { Effect, Schema, Semaphore } from "effect"
 import * as Tool from "./tool"
 import { LSP } from "@/lsp/lsp"
 import { createTwoFilesPatch, diffLines } from "diff"
-import DESCRIPTION from "./edit.txt"
 import { FileSystem } from "@opencode-ai/core/filesystem"
 import { Watcher } from "@opencode-ai/core/filesystem/watcher"
 import { EventV2Bridge } from "@/event-v2-bridge"
@@ -18,6 +17,7 @@ import { Snapshot } from "@/snapshot"
 import { assertExternalDirectoryEffect } from "./external-directory"
 import { FSUtil } from "@opencode-ai/core/fs-util"
 import * as Bom from "@/util/bom"
+import { getSync } from "@/prompt-loader"
 
 function normalizeLineEndings(text: string): string {
   return text.replaceAll("\r\n", "\n")
@@ -64,7 +64,7 @@ export const EditTool = Tool.define(
     const events = yield* EventV2Bridge.Service
 
     return {
-      description: DESCRIPTION,
+      description: getSync("tool/edit"),
       parameters: Parameters,
       execute: (params: Schema.Schema.Type<typeof Parameters>, ctx: Tool.Context) =>
         Effect.gen(function* () {
