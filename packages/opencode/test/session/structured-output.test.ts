@@ -165,6 +165,7 @@ describe("structured-output.AssistantMessage", () => {
 describe("structured-output.createStructuredOutputTool", () => {
   test("creates tool with description", () => {
     const tool = SessionPrompt.createStructuredOutputTool({
+        description: "Test description",
       schema: { type: "object" },
       onSuccess: () => {},
     })
@@ -183,6 +184,7 @@ describe("structured-output.createStructuredOutputTool", () => {
     }
 
     const tool = SessionPrompt.createStructuredOutputTool({
+        description: "Test description",
       schema,
       onSuccess: () => {},
     })
@@ -202,6 +204,7 @@ describe("structured-output.createStructuredOutputTool", () => {
     }
 
     const tool = SessionPrompt.createStructuredOutputTool({
+        description: "Test description",
       schema,
       onSuccess: () => {},
     })
@@ -215,6 +218,7 @@ describe("structured-output.createStructuredOutputTool", () => {
     let capturedOutput: unknown
 
     const tool = SessionPrompt.createStructuredOutputTool({
+        description: "Test description",
       schema: { type: "object", properties: { name: { type: "string" } } },
       onSuccess: (output) => {
         capturedOutput = output
@@ -239,6 +243,7 @@ describe("structured-output.createStructuredOutputTool", () => {
     // So invalid inputs never reach the tool's execute function
     // This test documents the expected schema behavior
     const tool = SessionPrompt.createStructuredOutputTool({
+        description: "Test description",
       schema: {
         type: "object",
         properties: {
@@ -262,6 +267,7 @@ describe("structured-output.createStructuredOutputTool", () => {
     // So invalid inputs never reach the tool's execute function
     // This test documents the expected schema behavior
     const tool = SessionPrompt.createStructuredOutputTool({
+        description: "Test description",
       schema: {
         type: "object",
         properties: {
@@ -282,6 +288,7 @@ describe("structured-output.createStructuredOutputTool", () => {
     let capturedOutput: unknown
 
     const tool = SessionPrompt.createStructuredOutputTool({
+        description: "Test description",
       schema: {
         type: "object",
         properties: {
@@ -325,6 +332,7 @@ describe("structured-output.createStructuredOutputTool", () => {
     let capturedOutput: unknown
 
     const tool = SessionPrompt.createStructuredOutputTool({
+        description: "Test description",
       schema: {
         type: "object",
         properties: {
@@ -361,6 +369,7 @@ describe("structured-output.createStructuredOutputTool", () => {
 
   test("toModelOutput returns text value", async () => {
     const tool = SessionPrompt.createStructuredOutputTool({
+        description: "Test description",
       schema: { type: "object" },
       onSuccess: () => {},
     })
