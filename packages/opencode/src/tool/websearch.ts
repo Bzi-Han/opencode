@@ -2,10 +2,10 @@ import { Effect, Schema } from "effect"
 import { HttpClient } from "effect/unstable/http"
 import * as Tool from "./tool"
 import * as McpWebSearch from "./mcp-websearch"
-import DESCRIPTION from "./websearch.txt"
 import { checksum } from "@opencode-ai/core/util/encode"
 import { InstallationVersion } from "@opencode-ai/core/installation/version"
 import { RuntimeFlags } from "@/effect/runtime-flags"
+import { getSync } from "@/prompt-loader"
 
 export const Parameters = Schema.Struct({
   query: Schema.String.annotate({ description: "Websearch query" }),
@@ -102,10 +102,10 @@ export const WebSearchTool = Tool.define(
     const http = yield* HttpClient.HttpClient
     const flags = yield* RuntimeFlags.Service
 
+    const description = (getSync("tool/websearch")).replace("{{year}}", new Date().getFullYear().toString())
+
     return {
-      get description() {
-        return DESCRIPTION.replace("{{year}}", new Date().getFullYear().toString())
-      },
+      description,
       parameters: Parameters,
       execute: (params: Schema.Schema.Type<typeof Parameters>, ctx: Tool.Context) =>
         Effect.gen(function* () {

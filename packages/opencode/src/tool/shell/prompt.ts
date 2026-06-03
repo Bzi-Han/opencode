@@ -1,5 +1,4 @@
 import { Schema } from "effect"
-import DESCRIPTION from "./shell.txt"
 import { PositiveInt } from "@opencode-ai/core/schema"
 import { Global } from "@opencode-ai/core/global"
 import { ShellID } from "./id"
@@ -284,10 +283,10 @@ function profile(name: string, platform: NodeJS.Platform, limits: Limits, defaul
   }
 }
 
-export function render(name: string, platform: NodeJS.Platform, limits: Limits, defaultTimeoutMs: number) {
+export function render(template: string, name: string, platform: NodeJS.Platform, limits: Limits, defaultTimeoutMs: number) {
   const selected = profile(name, platform, limits, defaultTimeoutMs)
   return {
-    description: renderPrompt(DESCRIPTION, {
+    description: renderPrompt(template, {
       intro: selected.intro,
       os: platform,
       shell: name,

@@ -7,8 +7,7 @@ import { Config } from "@/config/config"
 import { MCP } from "../mcp"
 import { Skill } from "../skill"
 import { EventV2 } from "@opencode-ai/core/event"
-import PROMPT_INITIALIZE from "./template/initialize.txt"
-import PROMPT_REVIEW from "./template/review.txt"
+import { getSync } from "@/prompt-loader"
 
 type State = {
   commands: Record<string, Info>
@@ -46,7 +45,7 @@ export function hints(template: string) {
   if (numbered) {
     for (const match of [...new Set(numbered)].sort()) result.push(match)
   }
-  if (template.includes("$ARGUMENTS")) result.push("$ARGUMENTS")
+  if (template.includes("${ARGUMENTS}")) result.push("${ARGUMENTS}")
   return result
 }
 
@@ -72,26 +71,24 @@ export const layer = Layer.effect(
     const init = Effect.fn("Command.state")(function* (ctx: InstanceContext) {
       const cfg = yield* config.get()
       const bridge = yield* EffectBridge.make()
+        const promptInit = getSync("command/initialize")
+      const promptReview = getSync("command/review")
       const commands: Record<string, Info> = {}
 
       commands[Default.INIT] = {
         name: Default.INIT,
         description: "guided AGENTS.md setup",
         source: "command",
-        get template() {
-          return PROMPT_INITIALIZE.replace("${path}", ctx.worktree)
-        },
-        hints: hints(PROMPT_INITIALIZE),
+        template: promptInit.replace("${path}", ctx.worktree),
+        hints: hints(promptInit),
       }
       commands[Default.REVIEW] = {
         name: Default.REVIEW,
         description: "review changes [commit|branch|pr], defaults to uncommitted",
         source: "command",
-        get template() {
-          return PROMPT_REVIEW.replace("${path}", ctx.worktree)
-        },
+        template: promptReview.replace("${path}", ctx.worktree),
         subtask: true,
-        hints: hints(PROMPT_REVIEW),
+        hints: hints(promptReview),
       }
 
       for (const [name, command] of Object.entries(cfg.command ?? {})) {

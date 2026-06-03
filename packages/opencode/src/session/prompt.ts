@@ -9,6 +9,7 @@ import { SessionRevert } from "./revert"
 import { Session } from "./session"
 import { Agent } from "../agent/agent"
 import { Provider } from "@/provider/provider"
+import { getSync } from "@/prompt-loader"
 
 import { type Tool as AITool, tool, jsonSchema } from "ai"
 import type { JSONSchema7 } from "@ai-sdk/provider"
@@ -16,7 +17,6 @@ import { SessionCompaction } from "./compaction"
 import { SystemPrompt } from "./system"
 import { Instruction } from "./instruction"
 import { Plugin } from "../plugin"
-import MAX_STEPS from "../session/prompt/max-steps.txt"
 import { ToolRegistry } from "@/tool/registry"
 import { MCP } from "../mcp"
 import { LSP } from "@/lsp/lsp"
@@ -68,16 +68,6 @@ globalThis.AI_SDK_LOG_WARNINGS = false
 
 const decodeMessageInfo = Schema.decodeUnknownExit(SessionV1.Info)
 const decodeMessagePart = Schema.decodeUnknownExit(SessionV1.Part)
-
-const STRUCTURED_OUTPUT_DESCRIPTION = `Use this tool to return your final response in the requested structured format.
-
-IMPORTANT:
-- You MUST call this tool exactly once at the end of your response
-- The input must be valid JSON matching the required schema
-- Complete all necessary research and tool calls BEFORE calling this tool
-- This tool provides your final answer - no further actions are taken after calling it`
-
-const STRUCTURED_OUTPUT_SYSTEM_PROMPT = `IMPORTANT: The user has requested structured output. You MUST use the StructuredOutput tool to provide your final response. Do NOT respond with plain text - you MUST call the StructuredOutput tool with your answer formatted according to the schema.`
 
 const log = Log.create({ service: "session.prompt" })
 const elog = EffectLogger.create({ service: "session.prompt" })
@@ -1405,6 +1395,7 @@ export const layer = Layer.effect(
 
             if (lastUser.format?.type === "json_schema") {
               tools["StructuredOutput"] = createStructuredOutputTool({
+                description: getSync("inline/structured-output-description"),
                 schema: lastUser.format.schema,
                 onSuccess(output) {
                   structured = output
@@ -1443,7 +1434,7 @@ export const layer = Layer.effect(
             ])
             const system = [...env, ...instructions, ...(skills ? [skills] : [])]
             const format = lastUser.format ?? { type: "text" as const }
-            if (format.type === "json_schema") system.push(STRUCTURED_OUTPUT_SYSTEM_PROMPT)
+            if (format.type === "json_schema") system.push(getSync("inline/structured-output-system"))
             const result = yield* handle.process({
               user: lastUser,
               agent,
@@ -1451,7 +1442,7 @@ export const layer = Layer.effect(
               sessionID,
               parentSessionID: session.parentID,
               system,
-              messages: [...modelMsgs, ...(isLastStep ? [{ role: "assistant" as const, content: MAX_STEPS }] : [])],
+              messages: [...modelMsgs, ...(isLastStep ? [{ role: "assistant" as const, content: getSync("plan/max-steps") }] : [])],
               tools,
               model,
               toolChoice: format.type === "json_schema" ? "required" : undefined,
@@ -1543,8 +1534,8 @@ export const layer = Layer.effect(
         if (position === last) return args.slice(argIndex).join(" ")
         return args[argIndex]
       })
-      const usesArgumentsPlaceholder = templateCommand.includes("$ARGUMENTS")
-      let template = withArgs.replaceAll("$ARGUMENTS", input.arguments)
+      const usesArgumentsPlaceholder = templateCommand.includes("${ARGUMENTS}")
+      let template = withArgs.replaceAll("${ARGUMENTS}", input.arguments)
 
       if (placeholders.length === 0 && !usesArgumentsPlaceholder && input.arguments.trim()) {
         template = template + "\n\n" + input.arguments
@@ -1748,6 +1739,7 @@ export type CommandInput = Schema.Schema.Type<typeof CommandInput>
 
 /** @internal Exported for testing */
 export function createStructuredOutputTool(input: {
+  description: string
   schema: Record<string, any>
   onSuccess: (output: unknown) => void
 }): AITool {
@@ -1755,7 +1747,7 @@ export function createStructuredOutputTool(input: {
   const { $schema: _, ...toolSchema } = input.schema
 
   return tool({
-    description: STRUCTURED_OUTPUT_DESCRIPTION,
+    description: input.description,
     inputSchema: jsonSchema(toolSchema as JSONSchema7),
     async execute(args) {
       // AI SDK validates args against inputSchema before calling execute()

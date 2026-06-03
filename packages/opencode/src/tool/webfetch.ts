@@ -3,8 +3,8 @@ import { HttpClient, HttpClientRequest } from "effect/unstable/http"
 import { Parser } from "htmlparser2"
 import * as Tool from "./tool"
 import TurndownService from "turndown"
-import DESCRIPTION from "./webfetch.txt"
 import { isImageAttachment } from "@/util/media"
+import { getSync } from "@/prompt-loader"
 
 const MAX_RESPONSE_SIZE = 5 * 1024 * 1024 // 5MB
 const DEFAULT_TIMEOUT = 30 * 1000 // 30 seconds
@@ -28,7 +28,7 @@ export const WebFetchTool = Tool.define(
     const httpOk = HttpClient.filterStatusOk(http)
 
     return {
-      description: DESCRIPTION,
+      description: getSync("tool/webfetch"),
       parameters: Parameters,
       execute: (params: Schema.Schema.Type<typeof Parameters>, ctx: Tool.Context) =>
         Effect.gen(function* () {

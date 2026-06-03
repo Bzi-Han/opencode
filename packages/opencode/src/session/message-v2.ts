@@ -38,6 +38,7 @@ import type { SystemError } from "bun"
 import type { Provider } from "@/provider/provider"
 import { Effect, Schema } from "effect"
 import * as EffectLogger from "@opencode-ai/core/effect/logger"
+import { getSync } from "@/prompt-loader"
 
 /** Error shape thrown by Bun's fetch() when gzip/br decompression fails mid-stream */
 interface FetchDecompressionError extends Error {
@@ -46,7 +47,6 @@ interface FetchDecompressionError extends Error {
   path: string
 }
 
-export const SYNTHETIC_ATTACHMENT_PROMPT = "Attached media from tool result:"
 export { isMedia }
 
 function truncateToolOutput(text: string, maxChars?: number) {
@@ -145,6 +145,7 @@ export const toModelMessagesEffect = Effect.fnUntraced(function* (
   model: Provider.Model,
   options?: { stripMedia?: boolean; toolOutputMaxChars?: number },
 ) {
+    const syntheticAttachment = getSync("inline/synthetic-attachment")
   const result: UIMessage[] = []
   const toolNames = new Set<string>()
   // Track media from tool results that need to be injected as user messages
@@ -397,7 +398,7 @@ export const toModelMessagesEffect = Effect.fnUntraced(function* (
             parts: [
               {
                 type: "text" as const,
-                text: SYNTHETIC_ATTACHMENT_PROMPT,
+                text: syntheticAttachment,
               },
               ...media.map((attachment) => ({
                 type: "file" as const,

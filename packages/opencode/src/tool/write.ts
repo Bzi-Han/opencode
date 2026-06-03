@@ -4,7 +4,6 @@ import { Effect } from "effect"
 import * as Tool from "./tool"
 import { LSP } from "@/lsp/lsp"
 import { createTwoFilesPatch } from "diff"
-import DESCRIPTION from "./write.txt"
 import { EventV2Bridge } from "@/event-v2-bridge"
 import { FileSystem } from "@opencode-ai/core/filesystem"
 import { Watcher } from "@opencode-ai/core/filesystem/watcher"
@@ -14,6 +13,7 @@ import { InstanceState } from "@/effect/instance-state"
 import { trimDiff } from "./edit"
 import { assertExternalDirectoryEffect } from "./external-directory"
 import * as Bom from "@/util/bom"
+import { getSync } from "@/prompt-loader"
 
 const MAX_PROJECT_DIAGNOSTICS_FILES = 5
 
@@ -33,7 +33,7 @@ export const WriteTool = Tool.define(
     const format = yield* Format.Service
 
     return {
-      description: DESCRIPTION,
+      description: getSync("tool/write"),
       parameters: Parameters,
       execute: (params: { content: string; filePath: string }, ctx: Tool.Context) =>
         Effect.gen(function* () {

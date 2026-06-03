@@ -8,7 +8,7 @@ import { MessageV2 } from "../session/message-v2"
 import { Provider } from "@/provider/provider"
 import { InstanceState } from "@/effect/instance-state"
 import { MessageID, PartID } from "../session/schema"
-import EXIT_DESCRIPTION from "./plan-exit.txt"
+import { getSync } from "@/prompt-loader"
 
 export const Parameters = Schema.Struct({})
 
@@ -20,7 +20,7 @@ export const PlanExitTool = Tool.define(
     const provider = yield* Provider.Service
 
     return {
-      description: EXIT_DESCRIPTION,
+      description: getSync("tool/plan-exit"),
       parameters: Parameters,
       execute: (_params: {}, ctx: Tool.Context) =>
         Effect.gen(function* () {

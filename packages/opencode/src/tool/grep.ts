@@ -5,9 +5,9 @@ import { InstanceState } from "@/effect/instance-state"
 import { FSUtil } from "@opencode-ai/core/fs-util"
 import { Ripgrep } from "@opencode-ai/core/filesystem/ripgrep"
 import { assertExternalDirectoryEffect } from "./external-directory"
-import DESCRIPTION from "./grep.txt"
 import * as Tool from "./tool"
 import { Reference } from "@/reference/reference"
+import { getSync } from "@/prompt-loader"
 
 const MAX_LINE_LENGTH = 2000
 
@@ -29,7 +29,7 @@ export const GrepTool = Tool.define(
     const reference = yield* Reference.Service
 
     return {
-      description: DESCRIPTION,
+      description: getSync("tool/grep"),
       parameters: Parameters,
       execute: (params: { pattern: string; path?: string; include?: string }, ctx: Tool.Context) =>
         Effect.gen(function* () {
